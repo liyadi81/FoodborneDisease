@@ -93,13 +93,38 @@ shinyServer(function(input, output) {
     top10 = head(rankdf, 10)
     return(top10)
   }
+
+  rank_food_multistate <- function() {
+    food_list_raw = outbreaks[outbreaks$State == "Multistate", 'Food']
+    food_list_split1 = unname(unlist(sapply(unique(food_list_raw), 
+                                            function(x) strsplit(x, split = "; "))))
+    food_list_split2 = unname(unlist(sapply(unique(food_list_split1), 
+                                            function(x) strsplit(x, split = ", "))))
+    ranklist = sort(sapply(unique(food_list_split2), 
+                           function(x) length(grep(x, food_list_raw))),
+                    decreasing = T)
+    ranklist["Unspecified"] = 0
+    ranklist["Other"] = 0
+    ranklist["Ground"] = 0
+    ranklist["Beef"] = 0
+    ranklist = sort(ranklist, decreasing = T)
+    rankdf = data.frame(Food = names(ranklist), rank = ranklist)
+    top10 = head(rankdf, 10)
+    return(top10)
+  }
   
+  rank_species <- function() {
+    rankspe = sort(sapply(contaminant,
+                          function(x) length(grep(x, outbreaks$Species))),
+                   decreasing = T)
+    rankdf = data.frame(species = names(rankspe), rank = rankspe)
+    return(head(rankdf, 10))
+  }
   
   ncase_by_stateyear <- reactive({
     outbreaks %>% filter(State == input$statename) %>% 
       group_by(Year) %>% summarise(count = n())
   })
- 
   
 
   output$allbyyear <- renderGvis(
@@ -112,7 +137,7 @@ shinyServer(function(input, output) {
                                    vAxis = ifelse(input$count_by1 == "ncases",
                                                   "{title:'Number of cases'}",
                                                   "{title:'Number of people'}"),
-                                   width = 600, height = 450))
+                                   width = 600, height = 400))
   )
   
   output$allbymonth <- renderGvis(
@@ -125,7 +150,7 @@ shinyServer(function(input, output) {
                                    vAxis = ifelse(input$count_by1 == "ncases",
                                                   "{title:'Number of cases'}",
                                                   "{title:'Number of people'}"),
-                                   width = 600, height = 450))
+                                   width = 600, height = 400))
   )
   
   output$map <- renderGvis({
@@ -177,7 +202,8 @@ shinyServer(function(input, output) {
     gvisBarChart(rank_food_by_state(input$statename),
                  xvar = "Food",
                  yvar = "rank",
-                 options = list(width = 600, height = 450)
+                 options = list(title = "Top 10 foods that case most illnesses in selected state",
+                                width = 600, height = 450)
                  )
   )
   
@@ -191,10 +217,29 @@ shinyServer(function(input, output) {
     gvisPieChart(data = loca_count,
                  labelvar = "location",
                  numvar = "loca_count",
-                 options = list(title = "",
+                 options = list(title = "Illnesses by location",
                                 is3D = T,
-                                width = 600)
+                                height = 300)
       
     )
   )
+
+  output$multistate <- renderGvis(
+    gvisBarChart(rank_food_multistate(),
+                 xvar = "Food",
+                 yvar = "rank",
+                 options = list(height = 300,
+                                title = "Top 10 foods that case most illnesses in multistate outbreaks")
+    )
+  )
+  
+  output$byspecies <- renderGvis(
+    gvisBarChart(rank_species(),
+                 xvar = "species",
+                 yvar = "rank",
+                 options = list(height = 300,
+                                title = "Top 10 species that case most illnesses")
+    )
+  )
+  
 })

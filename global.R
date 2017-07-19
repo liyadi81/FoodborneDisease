@@ -24,3 +24,10 @@ state_name = c("Alabama", "Alaska", "Arizona", "Arkansas", "California",
                "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
                "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
                "West Virginia", "Wisconsin", "Wyoming") 
+
+contaminant = c("Bacillus", "Bacterium", "Campylobacter", "Chemical or toxin",
+                "Ciguatoxin", "Clostridium", "Cryptosporidium", "Cyclospora",
+                "Escherichia coli", "Giardia intestinalis", "Heavy metals", 
+                "Hepatitis A", "Histamine", "Listeria", "Mycotoxins", "Norovirus",
+                "Paralytic shellfish poison", "Rotavirus", "Salmonella enterica", 
+                "Scombroid toxin", "Shigella", "Staphylococcus", "Vibrio", "Virus")
